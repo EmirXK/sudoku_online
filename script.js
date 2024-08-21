@@ -1,11 +1,11 @@
 let initialBoard = [];
 
-document.getElementById('generate').addEventListener('click', generateSudoku2);
+document.getElementById('generate').addEventListener('click', generateSudokuButtonClicked);
 document.getElementById('restart').addEventListener('click', restartPuzzle);
 document.getElementById('giveUp').addEventListener('click', giveUp);
 document.getElementById('checkSolution').addEventListener('click', checkSolution);
 
-function generateSudoku2() {
+function generateSudokuButtonClicked() {
     console.log("generate called");
     const difficulty = document.getElementById('difficulty').value;
     
