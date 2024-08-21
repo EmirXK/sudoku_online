@@ -10,17 +10,7 @@ function generateSudoku() {
     
     // Simulated board data for demonstration
     const data = {
-        board: [
-            [5, 3, 0, 0, 7, 0, 0, 0, 0],
-            [6, 0, 0, 1, 9, 5, 0, 0, 0],
-            [0, 9, 8, 0, 0, 0, 0, 6, 0],
-            [8, 0, 0, 0, 6, 0, 0, 0, 3],
-            [4, 0, 0, 8, 0, 3, 0, 0, 1],
-            [7, 0, 0, 0, 2, 0, 0, 0, 6],
-            [0, 6, 0, 0, 0, 0, 2, 8, 0],
-            [0, 0, 0, 4, 1, 9, 0, 0, 5],
-            [0, 0, 0, 0, 8, 0, 0, 7, 9]
-        ]
+        board: generateSudoku(difficulty)
     };
     const board = data.board;
 
@@ -63,17 +53,7 @@ function giveUp() {
     }
 
     // Simulated solved board for demonstration
-    const solvedBoard = [
-        [5, 3, 4, 6, 7, 8, 9, 1, 2],
-        [6, 7, 2, 1, 9, 5, 3, 4, 8],
-        [1, 9, 8, 3, 4, 2, 5, 6, 7],
-        [8, 5, 9, 7, 6, 1, 4, 2, 3],
-        [4, 2, 6, 8, 5, 3, 7, 9, 1],
-        [7, 1, 3, 9, 2, 4, 8, 5, 6],
-        [9, 6, 1, 5, 3, 7, 2, 8, 4],
-        [2, 8, 7, 4, 1, 9, 6, 3, 5],
-        [3, 4, 5, 2, 8, 6, 1, 7, 9]
-    ];
+    const solvedBoard = sudokuSolver(board);
 
     solvedBoard.forEach((row, i) => {
         row.forEach((cell, j) => {
@@ -168,4 +148,169 @@ function restartPuzzle() {
             cellInput.classList.remove('invalid');
         }
     }
+}
+
+
+
+// solve
+
+function sudokuSolver(board) {
+    solveRecursive(board);
+    return board;
+}
+
+function solveRecursive(board) {
+    // iterate the whole matrix
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board.length; j++) {
+            // check if empty (in our case empty = 0)
+            if (board[i][j] === 0) {
+                // iterate possible values
+                let numbers = Array.from({ length: 9 }, (_, k) => k + 1);
+                shuffle(numbers);
+                for (let val of numbers) {
+                    if (isValid(board, i, j, val)) {
+                        board[i][j] = val;
+                        if (solveRecursive(board)) {
+                            return true;
+                        } else {
+                            // backtrack
+                            board[i][j] = 0;
+                        }
+                    }
+                }
+                // if for loop ends with no valid values
+                return false;
+            }
+        }
+    }
+    // if we reach the end of the matrix with no issues
+    return true;
+}
+
+function isValid(board, i, j, val) {
+    // check rows and cols
+    for (let x = 0; x < board.length; x++) {
+        if (board[i][x] === val || board[x][j] === val) {
+            return false;
+        }
+    }
+
+    // check 3x3 area
+    let row = Math.floor(i / 3) * 3;
+    let col = Math.floor(j / 3) * 3;
+
+    for (let x = row; x < row + 3; x++) {
+        for (let y = col; y < col + 3; y++) {
+            if (board[x][y] === val) {
+                return false;
+            }
+        }
+    }
+
+    // is valid
+    return true;
+}
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+
+
+// generate
+
+function removeNumbers(board, attempts) {
+    while (attempts > 0) {
+        let row = Math.floor(Math.random() * 9);
+        let col = Math.floor(Math.random() * 9);
+        while (board[row][col] === 0) {
+            row = Math.floor(Math.random() * 9);
+            col = Math.floor(Math.random() * 9);
+        }
+        const backup = board[row][col];
+        board[row][col] = 0;
+
+        // make a copy of the board to test uniqueness
+        const boardCopy = board.map(row => row.slice());
+        if (!isUniqueSolution(boardCopy)) {
+            board[row][col] = backup;
+            attempts -= 1;
+        }
+    }
+}
+
+function isUniqueSolution(board) {
+    // use a counter to keep track of the number of solutions
+    const solutions = [0];
+    solveWithCounter(board, solutions);
+    return solutions[0] === 1;
+}
+
+function solveWithCounter(board, solutions) {
+    // solve the board again and keep track of the number of solutions
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+            if (board[i][j] === 0) {
+                for (let val = 1; val <= 9; val++) {
+                    if (isValid(board, i, j, val)) {
+                        board[i][j] = val;
+                        solveWithCounter(board, solutions);
+                        board[i][j] = 0;
+
+                        if (solutions[0] > 1) {
+                            return;
+                        }
+                    }
+                }
+                return;
+            }
+        }
+    }
+    solutions[0] += 1;
+}
+
+function generateSudoku(difficulty = 'medium') {
+    // generate a fully solved board
+    let board = Array.from({ length: 9 }, () => Array(9).fill(0));
+    board = sudokuSolver(board);
+
+    // define the number of attempts based on difficulty
+    let attempts;
+    switch (difficulty) {
+        case 'easy':
+            attempts = 2; // a lot of clues
+            break;
+        case 'medium':
+            attempts = 5;
+            break;
+        case 'hard':
+            attempts = 8;
+            break;
+        case 'expert':
+            attempts = 11; // very few clues
+            break;
+        default:
+            attempts = 5;
+    }
+
+    // remove numbers to create the puzzle
+    removeNumbers(board, attempts);
+
+    return board;
+}
+
+function blankSpaces(board) {
+    let count = 0;
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board.length; j++) {
+            if (board[i][j] === 0) {
+                count += 1;
+            }
+        }
+    }
+    return count;
 }
