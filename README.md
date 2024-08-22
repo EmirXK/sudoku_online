@@ -4,7 +4,7 @@ Welcome to the Sudoku Online Game! This project is a web-based Sudoku game that 
 
 ## Live Demo
 
-You can try the game online at [Sudoku Online](https://emirxk.github.io/sudoku_online/).
+You can try the game online at <a href="https://emirxk.github.io/sudoku_online" target="_blank" rel="noopener">Sudoku Online</a>
 
 ## Features
 
