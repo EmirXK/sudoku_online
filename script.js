@@ -1,3 +1,5 @@
+// legacy code, no longer used.
+
 let initialBoard = [];
 
 document.getElementById('generate').addEventListener('click', generateSudokuButtonClicked);

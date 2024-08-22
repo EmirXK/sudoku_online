@@ -13,6 +13,7 @@ You can try the game online at [Sudoku Online](https://emirxk.github.io/sudoku_o
 - **Give Up:** Automatically solve the puzzle and reveal the solution.
 - **Check Solution:** Validate the current puzzle solution and highlight any mistakes.
 - **Responsive Design:** The game interface is designed to be user-friendly and responsive.
+- **No Guessing Required** The solving algorithms used guarantee that a logically solvable design is generated.
 
 ## Files
 
@@ -30,10 +31,10 @@ The CSS file that styles the Sudoku game board and interface elements. It define
 - Styles for the Sudoku table and cells.
 - Highlighting for invalid entries.
 
-### `script.js`
+### `human_solver.js`
 
 The JavaScript file that handles the game logic, including:
-- Generating a Sudoku puzzle based on selected difficulty.
+- Generating a logically solvable Sudoku puzzle based on selected difficulty.
 - Restarting the puzzle and handling user inputs.
 - Solving the puzzle and validating the solution.
 - Functions to shuffle and remove numbers to create puzzles with unique solutions.
