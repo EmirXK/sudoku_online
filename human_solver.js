@@ -30,18 +30,29 @@ function generateSudokuButtonClicked() {
         for (let j = 0; j < 9; j++) {
             const cell = document.createElement('td');
             const cellInput = document.createElement('input');
-            cellInput.type = 'text';
-            cellInput.maxLength = 1;
+            cellInput.type = 'text'; // Change type to 'text'
+            cellInput.maxLength = 1; // Limit to 1 character
             cellInput.id = `cell-${i}-${j}`;
             cellInput.value = board[i][j] !== 0 ? board[i][j] : '';
             cellInput.readOnly = board[i][j] !== 0;
             cellInput.classList.remove('invalid');
+
+            // Restrict input to single digits only
+            cellInput.addEventListener('input', function() {
+                let value = this.value;
+                if (!/^[1-9]$/.test(value)) {
+                    this.value = ''; // Clear invalid input
+                }
+            });
+
             cell.appendChild(cellInput);
             row.appendChild(cell);
         }
         boardTable.appendChild(row);
     }
 }
+
+
 
 function giveUp() {
     console.log("give up called")
@@ -57,49 +68,16 @@ function giveUp() {
     }
 
     // Simulated solved board for demonstration
-    const solvedBoard = sudokuSolver(board);
+    solve(board)
 
-    console.log(prettyPrint(solvedBoard))
+    console.log(prettyPrint(board))
 
-    solvedBoard.forEach((row, i) => {
+    board.forEach((row, i) => {
         row.forEach((cell, j) => {
             const cellInput = document.getElementById(`cell-${i}-${j}`);
             cellInput.value = cell !== 0 ? cell : '';
         });
     });
-}
-
-function sudokuSolver(board) {
-    if (solveRecursive(board))
-        return board;
-    else return null;
-}
-
-function solveRecursive(board) {
-    // iterate the whole matrix
-    for (let i = 0; i < board.length; i++) {
-        for (let j = 0; j < board.length; j++) {
-            // check if empty (in our case empty = 0)
-            if (board[i][j] === 0) {
-                // iterate possible values
-                for (let val = 1; val < 10; val++) {
-                    if (is_valid_value(i, j, val)) {
-                        board[i][j] = val;
-                        if (solveRecursive(board)) {
-                            return true;
-                        } else {
-                            // backtrack
-                            board[i][j] = 0;
-                        }
-                    }
-                }
-                // if for loop ends with no valid values
-                return false;
-            }
-        }
-    }
-    // if we reach the end of the matrix with no issues
-    return true;
 }
 
 function checkSolution() {
