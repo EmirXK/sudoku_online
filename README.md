@@ -13,7 +13,7 @@ You can try the game online at <a href="https://emirxk.github.io/sudoku_online" 
 - **Give Up:** Automatically solve the puzzle and reveal the solution.
 - **Check Solution:** Validate the current puzzle solution and highlight any mistakes.
 - **Responsive Design:** The game interface is designed to be user-friendly and responsive.
-- **No Guessing Required** The solving algorithms used guarantee that a logically solvable design is generated.
+- **No Guessing Required:** The solving algorithms used guarantee that a logically solvable design is generated.
 
 ## Files
 
