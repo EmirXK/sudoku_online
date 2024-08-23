@@ -68,6 +68,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 - Sudoku generation and solving logic inspired by various Sudoku algorithms.
 - UI design inspired by common web-based Sudoku games.
+- Huge thanks to [cagdas-karatas](https://github.com/cagdas-karatas) for contributing to the project.
 
 ## Contact
 
