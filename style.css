@@ -1,12 +1,81 @@
+:root{
+    --color1: #FFBE98;
+    --color2: #0B8494;
+    --color3: #125B9A;
+    --color4: #F05A7E;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: Arial, sans-serif;
     text-align: center;
     margin: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: var(--color1);
+}
+
+button {
+    cursor: pointer;
+    width: 100px;
+    height: 50px;
+    border: none;
+    background-color: var(--color2);
+    color: white;
+    border-radius: 10px;
+}
+
+#restart, #giveUp, #checkSolution{
+    display: none;
+}
+
+.choices {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+}
+
+.choices select{
+    width: 100px;
+    height: 50px;
+    background-color: var(--color4);
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+    border: none;
+    outline: none;
+    font-size: 15px;
+}
+
+#status-label {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.board-wrapper{
+    display: none;
+    border: 3px solid var(--color1);
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 10px 0px 20px 0px;
 }
 
 table {
     border-collapse: collapse;
-    margin: 20px auto;
 }
 
 td {
@@ -17,36 +86,14 @@ td {
     font-size: 20px;
 }
 
-th {
-    border: 1px solid #000;
-    background-color: #eee;
-}
-
-th, td {
-    border-width: 1px;
-}
-
-tr:first-child td {
-    border-top-width: 3px;
-    border-top-color: black;
-}
-
-th:nth-child(3n),
-td:nth-child(3n) {
+td:nth-child(3), td:nth-child(6){
     border-right-width: 3px;
-    border-right-color: black;
+    border-right-color: var(--color1);
 }
 
-th:nth-of-type(3n+1),
-td:nth-of-type(3n+1) {
-    border-left-width: 3px;
-    border-left-color: black;
-}
-
-tr:nth-child(3n),
-tr:nth-child(3n) td {
+tr:nth-child(3) td,  tr:nth-child(6) td{
     border-bottom-width: 3px;
-    border-bottom-color: black;
+    border-bottom-color: var(--color1);
 }
 
 td input {
@@ -63,8 +110,11 @@ td input {
     border-color: #ff0000;
 }
 
-#status-label {
-    margin-top: 10px;
-    font-size: 18px;
-    font-weight: bold;
+.result-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
 }

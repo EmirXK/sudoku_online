@@ -6,8 +6,30 @@ document.getElementById('generate').addEventListener('click', generateSudokuButt
 document.getElementById('restart').addEventListener('click', restartPuzzle);
 document.getElementById('giveUp').addEventListener('click', giveUp);
 document.getElementById('checkSolution').addEventListener('click', checkSolution);
+const boardWrapper = document.querySelector(".board-wrapper");
+const checkSolutionButton = document.querySelector("#checkSolution");
+const restartButton = document.querySelector("#restart");
+const giveUpButton = document.querySelector("#giveUp");
+
+document.querySelectorAll('button').forEach(button => {
+    button.addEventListener('mousedown', () => {
+        button.style.backgroundColor = "var(--color3)"; // Active state
+    });
+    
+    button.addEventListener('mouseup', () => {
+        button.style.backgroundColor = "var(--color2)"; // Normal state
+    });
+
+    button.addEventListener('mouseleave', () => {
+        button.style.backgroundColor = "var(--color2)"; // Revert if mouse leaves button
+    });
+});
+
 
 function generateSudokuButtonClicked() {
+    showButtons();
+    enableCheckSolutionButton();
+    boardWrapper.style = "display: flex;";
     console.log("generate called");
     const difficulty = document.getElementById('difficulty').value;
     
@@ -52,11 +74,10 @@ function generateSudokuButtonClicked() {
     }
 }
 
-
-
 function giveUp() {
-    console.log("give up called")
+    console.log("give up called");
     restartPuzzle();
+    disableCheckSolutionButton();
     const board = [];
     for (let i = 0; i < 9; i++) {
         const row = [];
@@ -154,6 +175,7 @@ function is_valid_value(i, j, val) {
 }
 
 function restartPuzzle() {
+    enableCheckSolutionButton();
     const statusLabel = document.getElementById('status-label');
     statusLabel.textContent = '';
 
@@ -468,3 +490,18 @@ function prettyPrint(board) {
     console.log(output);
 }
 
+function enableCheckSolutionButton()
+{
+    checkSolutionButton.setAttribute("style", "display: inline; cursor: pointer; background-color: #0B8494; pointer-events: all;");
+}
+
+function disableCheckSolutionButton()
+{
+    checkSolutionButton.setAttribute("style", "display: inline; cursor: default; background-color: gray; pointer-events: none;");
+}
+
+function showButtons()
+{
+    restartButton.setAttribute("style", "display: inline;");
+    giveUpButton.setAttribute("style", "display: inline;");
+}
