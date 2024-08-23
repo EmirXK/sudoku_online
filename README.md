@@ -5,7 +5,7 @@ Welcome to the Sudoku Online Game! This project is a web-based Sudoku game that 
 
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/c87066ae-0f2a-4c70-b1f7-60c800be017a" alt="Alt text" width="600" style="border: 2px solid black;"/>
+  <img src="https://github.com/user-attachments/assets/c87066ae-0f2a-4c70-b1f7-60c800be017a" alt="Alt text" width="300" style="border: 2px solid black;"/>
 </p>
 
 
