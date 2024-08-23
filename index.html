@@ -8,8 +8,7 @@
 </head>
 <body>
     <h1>Sudoku</h1>
-    <div>
-        <label for="difficulty">Select Difficulty:</label>
+    <div class="choices">
         <select id="difficulty">
             <option value="easy">Easy</option>
             <option value="medium">Medium</option>
@@ -20,9 +19,13 @@
         <button id="restart">Restart Puzzle</button>
     </div>
     <div id="status-label"></div>
-    <table id="sudoku-board"></table>
-    <button id="giveUp">Give Up</button>
-    <button id="checkSolution">Check Solution</button>
+    <div class="board-wrapper">
+        <table id="sudoku-board"></table>
+    </div>
+    <div class="result-buttons">
+        <button id="giveUp">Give Up</button>
+        <button id="checkSolution">Check Solution</button>
+    </div>
     <script src="human_solver.js"></script>
 </body>
 </html>
