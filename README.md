@@ -30,6 +30,7 @@ The CSS file that styles the Sudoku game board and interface elements. It define
 - Basic layout and font settings.
 - Styles for the Sudoku table and cells.
 - Highlighting for invalid entries.
+- Vibrant design features
 
 ### `human_solver.js`
 
