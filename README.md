@@ -2,6 +2,8 @@
 
 Welcome to the Sudoku Online Game! This project is a web-based Sudoku game that allows users to play Sudoku puzzles of various difficulty levels. The game features puzzle generation, validation, and solving functionalities.
 
+![Screenshot 2024-08-23 233459](https://github.com/user-attachments/assets/7034570c-2ce2-4d61-9643-b44bd1c9bb6a)
+
 ## Live Demo
 
 You can try the game online at <a href="https://emirxk.github.io/sudoku_online" target="_blank" rel="noopener">Sudoku Online</a>
