@@ -15,7 +15,7 @@ document.querySelectorAll('button').forEach(button => {
     button.addEventListener('mousedown', () => {
         button.style.backgroundColor = "var(--color3)"; // Active state
     });
-    
+
     button.addEventListener('mouseup', () => {
         button.style.backgroundColor = "var(--color2)"; // Normal state
     });
@@ -29,7 +29,7 @@ let candidateList;
 
 // Initialize the candidate list based on the current board state
 function initializeCandidateList(board) {
-    candidateList = Array.from({ length: size }, () => 
+    candidateList = Array.from({ length: size }, () =>
         Array.from({ length: size }, () => new Set())
     );
 
@@ -71,14 +71,13 @@ function updateCandidateList(board, row, col, num, add) {
     }
 }
 
-
 function generateSudokuButtonClicked() {
     showButtons();
     enableCheckSolutionButton();
     boardWrapper.style = "display: flex;";
     console.log("generate called");
     const difficulty = document.getElementById('difficulty').value;
-    
+
     // Simulated board data for demonstration
     const data = {
         board: generateHumanSolvablePuzzle(difficulty)
@@ -100,6 +99,7 @@ function generateSudokuButtonClicked() {
         const row = document.createElement('tr');
         for (let j = 0; j < 9; j++) {
             const cell = document.createElement('td');
+            cell.id = `td-${i}-${j}`;
             const cellInput = document.createElement('input');
             cellInput.type = 'tel'; // Use 'tel' to prompt number pad on mobile
             cellInput.inputMode = 'numeric'; // Ensure numeric keypad is used
@@ -110,7 +110,7 @@ function generateSudokuButtonClicked() {
             cellInput.classList.remove('invalid');
 
             // Restrict input to single digits only
-            cellInput.addEventListener('input', function() {
+            cellInput.addEventListener('input', function () {
                 let value = this.value;
                 if (!/^[1-9]$/.test(value)) {
                     this.value = ''; // Clear invalid input
@@ -122,6 +122,16 @@ function generateSudokuButtonClicked() {
         }
         boardTable.appendChild(row);
     }
+
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('focus', (event) => {
+            highlightSelectedNumber(parseInt(event.target.value));
+        });
+
+        input.addEventListener('focusout', (event) => {
+            removeHighlights();
+        });
+    });
 }
 
 function giveUp() {
@@ -152,7 +162,6 @@ function giveUp() {
 }
 
 function checkSolution() {
-    console.log("check solution called");
     let valid = true;
 
     for (let i = 0; i < 9; i++) {
@@ -233,10 +242,13 @@ function restartPuzzle() {
 
     for (let i = 0; i < 9; i++) {
         for (let j = 0; j < 9; j++) {
+            const cell = document.getElementById(`td-${i}-${j}`);
             const cellInput = document.getElementById(`cell-${i}-${j}`);
             cellInput.value = initialBoard[i][j] !== 0 ? initialBoard[i][j] : '';
             cellInput.readOnly = initialBoard[i][j] !== 0;
             cellInput.classList.remove('invalid');
+            cellInput.classList.remove('highlight');
+            cell.classList.remove('highlight');
         }
     }
 }
@@ -454,7 +466,6 @@ function nakedPairs(board) {
     return progress;
 }
 
-
 // Helper function to shuffle an array
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -510,7 +521,7 @@ function removeNumbers(board, difficulty) {
 
     while (attempts > 0 && iterationCount < maxIterations) {
         iterationCount++;
-        
+
         // Randomly select a filled cell
         const randomIndex = Math.floor(Math.random() * filledCells.length);
         const [row, col] = filledCells[randomIndex];
@@ -559,7 +570,6 @@ function countSolutions(board) {
     return count;
 }
 
-
 function deepCopy(board) {
     return board.map(row => row.slice());
 }
@@ -599,7 +609,6 @@ function generateHumanSolvablePuzzle(difficulty) {
     return puzzle;
 }
 
-
 function prettyPrint(board) {
     const size = board.length;
     const subgridSize = Math.sqrt(size);
@@ -622,18 +631,43 @@ function prettyPrint(board) {
     console.log(output);
 }
 
-function enableCheckSolutionButton()
-{
+function highlightSelectedNumber(num) {
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+            const cell = document.getElementById(`td-${i}-${j}`);
+            const cellInput = document.getElementById(`cell-${i}-${j}`);
+            const value = parseInt(cellInput.value);
+            if (value === num) {
+                cell.classList.add('highlight');
+                cellInput.classList.add('highlight');
+                cellInput.style.color = "white";
+                //cellInput.classList.remove('invalid');
+            }
+        }
+    }
+}
+
+function removeHighlights() {
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+            const cell = document.getElementById(`td-${i}-${j}`);
+            const cellInput = document.getElementById(`cell-${i}-${j}`);
+            cell.classList.remove('highlight');
+            cellInput.classList.remove('highlight');
+            cellInput.style.color = "black";
+        }
+    }
+}
+
+function enableCheckSolutionButton() {
     checkSolutionButton.setAttribute("style", "display: inline; cursor: pointer; background-color: #0B8494; pointer-events: all;");
 }
 
-function disableCheckSolutionButton()
-{
+function disableCheckSolutionButton() {
     checkSolutionButton.setAttribute("style", "display: inline; cursor: default; background-color: gray; pointer-events: none;");
 }
 
-function showButtons()
-{
+function showButtons() {
     restartButton.setAttribute("style", "display: inline;");
     giveUpButton.setAttribute("style", "display: inline;");
 }
