@@ -25,6 +25,52 @@ document.querySelectorAll('button').forEach(button => {
     });
 });
 
+let candidateList;
+
+// Initialize the candidate list based on the current board state
+function initializeCandidateList(board) {
+    candidateList = Array.from({ length: size }, () => 
+        Array.from({ length: size }, () => new Set())
+    );
+
+    for (let row = 0; row < size; row++) {
+        for (let col = 0; col < size; col++) {
+            if (board[row][col] === 0) {
+                for (let num = 1; num <= size; num++) {
+                    if (isValid(board, num, row, col)) {
+                        candidateList[row][col].add(num);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Update the candidate list after a cell's value is set or cleared
+function updateCandidateList(board, row, col, num, add) {
+    const startRow = Math.floor(row / subgridSize) * subgridSize;
+    const startCol = Math.floor(col / subgridSize) * subgridSize;
+
+    for (let i = 0; i < size; i++) {
+        candidateList[row][i].delete(num);
+        candidateList[i][col].delete(num);
+    }
+
+    for (let i = 0; i < subgridSize; i++) {
+        for (let j = 0; j < subgridSize; j++) {
+            candidateList[startRow + i][startCol + j].delete(num);
+        }
+    }
+
+    if (add) {
+        for (let i = 1; i <= size; i++) {
+            if (isValid(board, i, row, col)) {
+                candidateList[row][col].add(i);
+            }
+        }
+    }
+}
+
 
 function generateSudokuButtonClicked() {
     showButtons();
@@ -37,7 +83,10 @@ function generateSudokuButtonClicked() {
     const data = {
         board: generateHumanSolvablePuzzle(difficulty)
     };
+
     const board = data.board;
+
+    initializeCandidateList(board);
 
     initialBoard = JSON.parse(JSON.stringify(board));
 
@@ -52,7 +101,8 @@ function generateSudokuButtonClicked() {
         for (let j = 0; j < 9; j++) {
             const cell = document.createElement('td');
             const cellInput = document.createElement('input');
-            cellInput.type = 'text'; // Change type to 'text'
+            cellInput.type = 'tel'; // Use 'tel' to prompt number pad on mobile
+            cellInput.inputMode = 'numeric'; // Ensure numeric keypad is used
             cellInput.maxLength = 1; // Limit to 1 character
             cellInput.id = `cell-${i}-${j}`;
             cellInput.value = board[i][j] !== 0 ? board[i][j] : '';
@@ -102,6 +152,7 @@ function giveUp() {
 }
 
 function checkSolution() {
+    console.log("check solution called");
     let valid = true;
 
     for (let i = 0; i < 9; i++) {
@@ -175,6 +226,7 @@ function is_valid_value(i, j, val) {
 }
 
 function restartPuzzle() {
+    console.log("restart puzzle called");
     enableCheckSolutionButton();
     const statusLabel = document.getElementById('status-label');
     statusLabel.textContent = '';
@@ -227,58 +279,57 @@ function isSolved(board) {
     return findEmptyCell(board) === null;
 }
 
+// Eliminate candidates using the "Single Possibility" technique
 function eliminate(board) {
-    // Eliminate candidates using the "Single Possibility" technique
     let progress = false;
     for (let row = 0; row < size; row++) {
         for (let col = 0; col < size; col++) {
-            if (board[row][col] === 0) {
-                const candidates = [];
-                for (let num = 1; num <= 9; num++) {
-                    if (isValid(board, num, row, col)) {
-                        candidates.push(num);
-                    }
-                }
-                if (candidates.length === 1) {
-                    board[row][col] = candidates[0];
-                    progress = true;
-                }
+            if (board[row][col] === 0 && candidateList[row][col].size === 1) {
+                const [num] = [...candidateList[row][col]];
+                board[row][col] = num;
+                updateCandidateList(board, row, col, num, false);
+                progress = true;
             }
         }
     }
     return progress;
 }
 
+// Fill cells using the "Only Choice" technique
 function onlyChoice(board) {
-    // Fill cells using the "Only Choice" technique
     let progress = false;
-    for (let num = 1; num <= 9; num++) {
+    for (let num = 1; num <= size; num++) {
+        // Check each row
         for (let row = 0; row < size; row++) {
             const candidates = [];
             for (let col = 0; col < size; col++) {
-                if (board[row][col] === 0 && isValid(board, num, row, col)) {
+                if (board[row][col] === 0 && candidateList[row][col].has(num)) {
                     candidates.push(col);
                 }
             }
             if (candidates.length === 1) {
                 board[row][candidates[0]] = num;
+                updateCandidateList(board, row, candidates[0], num, false);
                 progress = true;
             }
         }
 
+        // Check each column
         for (let col = 0; col < size; col++) {
             const candidates = [];
             for (let row = 0; row < size; row++) {
-                if (board[row][col] === 0 && isValid(board, num, row, col)) {
+                if (board[row][col] === 0 && candidateList[row][col].has(num)) {
                     candidates.push(row);
                 }
             }
             if (candidates.length === 1) {
                 board[candidates[0]][col] = num;
+                updateCandidateList(board, candidates[0], col, num, false);
                 progress = true;
             }
         }
 
+        // Check each subgrid
         for (let boxRow = 0; boxRow < size; boxRow += subgridSize) {
             for (let boxCol = 0; boxCol < size; boxCol += subgridSize) {
                 const candidates = [];
@@ -286,7 +337,7 @@ function onlyChoice(board) {
                     for (let j = 0; j < subgridSize; j++) {
                         const row = boxRow + i;
                         const col = boxCol + j;
-                        if (board[row][col] === 0 && isValid(board, num, row, col)) {
+                        if (board[row][col] === 0 && candidateList[row][col].has(num)) {
                             candidates.push([row, col]);
                         }
                     }
@@ -294,6 +345,7 @@ function onlyChoice(board) {
                 if (candidates.length === 1) {
                     const [row, col] = candidates[0];
                     board[row][col] = num;
+                    updateCandidateList(board, row, col, num, false);
                     progress = true;
                 }
             }
@@ -303,33 +355,90 @@ function onlyChoice(board) {
 }
 
 function nakedPairs(board) {
-    // Implement the Naked Pairs technique
     let progress = false;
+
+    // Check rows for naked pairs
     for (let row = 0; row < size; row++) {
         for (let col = 0; col < size; col++) {
-            if (board[row][col] === 0) {
-                const candidates = [];
-                for (let num = 1; num <= 9; num++) {
-                    if (isValid(board, num, row, col)) {
-                        candidates.push(num);
+            if (candidateList[row][col].size === 2) {
+                const pair = [...candidateList[row][col]];
+                for (let otherCol = col + 1; otherCol < size; otherCol++) {
+                    if (candidateList[row][otherCol].size === 2 &&
+                        [...candidateList[row][otherCol]].every(num => pair.includes(num))) {
+
+                        // Eliminate pair from other cells in the row
+                        for (let i = 0; i < size; i++) {
+                            if (i !== col && i !== otherCol && board[row][i] === 0) {
+                                pair.forEach(num => {
+                                    if (candidateList[row][i].has(num)) {
+                                        candidateList[row][i].delete(num);
+                                        progress = true;
+                                    }
+                                });
+                            }
+                        }
                     }
                 }
-                if (candidates.length === 2) {
-                    for (let otherCol = col + 1; otherCol < size; otherCol++) {
-                        if (board[row][otherCol] === 0) {
-                            const otherCandidates = [];
-                            for (let num = 1; num <= 9; num++) {
-                                if (isValid(board, num, row, otherCol)) {
-                                    otherCandidates.push(num);
-                                }
+            }
+        }
+    }
+
+    // Check columns for naked pairs
+    for (let col = 0; col < size; col++) {
+        for (let row = 0; row < size; row++) {
+            if (candidateList[row][col].size === 2) {
+                const pair = [...candidateList[row][col]];
+                for (let otherRow = row + 1; otherRow < size; otherRow++) {
+                    if (candidateList[otherRow][col].size === 2 &&
+                        [...candidateList[otherRow][col]].every(num => pair.includes(num))) {
+
+                        // Eliminate pair from other cells in the column
+                        for (let i = 0; i < size; i++) {
+                            if (i !== row && i !== otherRow && board[i][col] === 0) {
+                                pair.forEach(num => {
+                                    if (candidateList[i][col].has(num)) {
+                                        candidateList[i][col].delete(num);
+                                        progress = true;
+                                    }
+                                });
                             }
-                            if (JSON.stringify(candidates) === JSON.stringify(otherCandidates)) {
-                                for (let i = 0; i < size; i++) {
-                                    if (i !== col && i !== otherCol && board[row][i] === 0) {
-                                        for (const num of candidates) {
-                                            if (isValid(board, num, row, i)) {
-                                                progress = true;
-                                                break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Check subgrids for naked pairs
+    for (let boxRow = 0; boxRow < size; boxRow += subgridSize) {
+        for (let boxCol = 0; boxCol < size; boxCol += subgridSize) {
+            for (let i = 0; i < subgridSize; i++) {
+                for (let j = 0; j < subgridSize; j++) {
+                    const row = boxRow + i;
+                    const col = boxCol + j;
+                    if (candidateList[row][col].size === 2) {
+                        const pair = [...candidateList[row][col]];
+                        for (let k = i; k < subgridSize; k++) {
+                            for (let l = j + 1; l < subgridSize; l++) {
+                                const otherRow = boxRow + k;
+                                const otherCol = boxCol + l;
+                                if (candidateList[otherRow][otherCol].size === 2 &&
+                                    [...candidateList[otherRow][otherCol]].every(num => pair.includes(num))) {
+
+                                    // Eliminate pair from other cells in the subgrid
+                                    for (let m = 0; m < subgridSize; m++) {
+                                        for (let n = 0; n < subgridSize; n++) {
+                                            const cellRow = boxRow + m;
+                                            const cellCol = boxCol + n;
+                                            if ((cellRow !== row || cellCol !== col) &&
+                                                (cellRow !== otherRow || cellCol !== otherCol) &&
+                                                board[cellRow][cellCol] === 0) {
+                                                pair.forEach(num => {
+                                                    if (candidateList[cellRow][cellCol].has(num)) {
+                                                        candidateList[cellRow][cellCol].delete(num);
+                                                        progress = true;
+                                                    }
+                                                });
                                             }
                                         }
                                     }
@@ -341,17 +450,10 @@ function nakedPairs(board) {
             }
         }
     }
+
     return progress;
 }
 
-function solveLogically(board) {
-    while (!isSolved(board)) {
-        if (!eliminate(board) && !onlyChoice(board) && !nakedPairs(board)) {
-            break;
-        }
-    }
-    return board;
-}
 
 // Helper function to shuffle an array
 function shuffle(array) {
@@ -388,16 +490,30 @@ function solve(board) {
     return false;
 }
 
-// Remove numbers to create a puzzle
+// remove numbers to generate a puzzle with a unique solution
 function removeNumbers(board, difficulty) {
-    let attempts = difficulty === 'easy' ? 30 : difficulty === 'medium' ? 35 : difficulty === 'hard' ? 40 : 45;
+    let attempts = difficulty === 'easy' ? 35 : difficulty === 'medium' ? 40 : difficulty === 'hard' ? 45 : 50;
+    const maxIterations = 500;
+    let iterationCount = 0;
+
     const puzzle = board.map(row => row.slice());
 
-    while (attempts > 0) {
-        const row = Math.floor(Math.random() * size);
-        const col = Math.floor(Math.random() * size);
+    // Create a list of filled cells
+    const filledCells = [];
+    for (let row = 0; row < size; row++) {
+        for (let col = 0; col < size; col++) {
+            if (puzzle[row][col] !== 0) {
+                filledCells.push([row, col]);
+            }
+        }
+    }
 
-        if (puzzle[row][col] === 0) continue;
+    while (attempts > 0 && iterationCount < maxIterations) {
+        iterationCount++;
+        
+        // Randomly select a filled cell
+        const randomIndex = Math.floor(Math.random() * filledCells.length);
+        const [row, col] = filledCells[randomIndex];
 
         const backup = puzzle[row][col];
         puzzle[row][col] = 0;
@@ -406,10 +522,13 @@ function removeNumbers(board, difficulty) {
         if (countSolutions(copy) !== 1) {
             puzzle[row][col] = backup;
         } else {
+            // If the cell is successfully cleared, remove it from the list of filled cells
+            filledCells.splice(randomIndex, 1);
             attempts--;
         }
     }
 
+    // console.log("iterationCount: " + iterationCount);
     return puzzle;
 }
 
@@ -421,23 +540,33 @@ function countSolutions(board) {
     const [row, col] = cell;
     let count = 0;
 
-    for (let num = 1; num <= size; num++) {
+    // Generate candidate list for the current cell
+    const candidates = [];
+    for (let num = 1; num <= 9; num++) {
         if (isValid(board, num, row, col)) {
-            board[row][col] = num;
-            count += countSolutions(board);
-            if (count > 1) break; // Early exit if more than one solution is found
-            board[row][col] = 0;
+            candidates.push(num);
         }
+    }
+
+    // Try each candidate
+    for (const num of candidates) {
+        board[row][col] = num;
+        count += countSolutions(board);
+        if (count > 1) break; // Early exit if more than one solution is found
+        board[row][col] = 0;
     }
 
     return count;
 }
 
+
 function deepCopy(board) {
     return board.map(row => row.slice());
 }
 
+// Solver logic using the global candidate list
 function solveWithLogic(board) {
+    initializeCandidateList(board);
     let progress;
     do {
         progress = false;
@@ -451,7 +580,9 @@ function solveWithLogic(board) {
 
 function generateHumanSolvablePuzzle(difficulty) {
     let puzzle;
+    let iterations = 0;
     do {
+        iterations += 1;
         const solvedBoard = generateSolvedBoard();
         puzzle = removeNumbers(solvedBoard, difficulty);
 
@@ -464,6 +595,7 @@ function generateHumanSolvablePuzzle(difficulty) {
         }
     } while (!puzzle);
 
+    console.log("Puzzle generated in " + iterations + " attempt(s)");
     return puzzle;
 }
 
