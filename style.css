@@ -93,7 +93,6 @@ td input {
     width: 100%;
     height: 100%;
     border: none;
-    outline: none;
     border-radius: 50%;
     font-size: 20px;
     text-align: center;
@@ -102,6 +101,7 @@ td input {
 
 td input:focus {
     border-radius: 0px;
+    outline-color: rgb(200, 200, 200);
     transform: scale(1.15);
 }
 
